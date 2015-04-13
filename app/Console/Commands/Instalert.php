@@ -46,10 +46,9 @@ class Instalert extends Command {
 	 */
 	public function fire()
 	{
-		
 		$instagram = new Instagram(self::APP_KEY);
 
-		$results = $instagram->getUserMedia(self::JINXED_USER_ID);
+		$results = $instagram->getUserMedia(self::JINXED_USER_ID, 200);
 
 		$posts = new Collection;
 
