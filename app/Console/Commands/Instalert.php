@@ -46,6 +46,7 @@ class Instalert extends Command {
 	 */
 	public function fire()
 	{
+		
 		$instagram = new Instagram(self::APP_KEY);
 
 		$results = $instagram->getUserMedia(self::JINXED_USER_ID);
@@ -70,6 +71,10 @@ class Instalert extends Command {
 
 		foreach($newPosts as $post) {
 			$post->save();
+
+			if($this->option('disable-notifications')) {
+				continue;
+			}
 
 			$AccountSid = 'AC16d9735b5bc62d2da35645a57592a7ac';
 			$AuthToken = 'fe83b2c93584ff131eb1cd7f9704b5a8';
@@ -113,7 +118,7 @@ class Instalert extends Command {
 	protected function getOptions()
 	{
 		return [
-			['example', null, InputOption::VALUE_OPTIONAL, 'An example option.', null],
+			['disable-notifications', null, InputOption::VALUE_OPTIONAL, 'Just populate the database with new posts, don\'t send notifications.', false],
 		];
 	}
 
