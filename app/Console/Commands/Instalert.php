@@ -96,7 +96,7 @@ class Instalert extends Command {
 			foreach($numbers as $number) {
 				$message = $client->account->messages->create(array(
 				    "From" => "786-393-6488",
-				    "To" => "330-730-9623",
+				    "To" => $number,
 				    "Body" => $body,
 				));
 			}
