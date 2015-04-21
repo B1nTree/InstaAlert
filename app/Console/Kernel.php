@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel {
 				 ->hourly();
 
 	    $schedule->command('instalert:update')
-	    		->everyFiveMinutes();
+	    		->cron('*/1 * * * *');
 	}
 
 }
