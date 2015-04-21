@@ -15,7 +15,7 @@ class Instalert extends Command {
 
 	const JINXED_USER_ID = '32576604';
 
-	/**
+	/*
 	 * The console command name.
 	 *
 	 * @var string
@@ -46,28 +46,34 @@ class Instalert extends Command {
 	 */
 	public function fire()
 	{
-		$instagram = new Instagram(self::APP_KEY);
+		//$instagram = new Instagram(self::APP_KEY);
 
-		$results = $instagram->getUserMedia(self::JINXED_USER_ID, 200);
+		//$results = $instagram->getUserMedia(self::JINXED_USER_ID, 250);
+		$today = Carbon::today();
+		$today = $today->timestamp;
+
+		$results = json_decode(file_get_contents(sprintf('https://api.instagram.com/v1/users/%s/media/recent/?client_id=%s&count=%s&min_timestamp=%s',
+			SELF::JINXED_USER_ID,
+			SELF::APP_KEY,
+			200,
+			$today
+		)));
 
 		$posts = new Collection;
 
-		foreach($results->data as $key => $result) {
-			$post = new Post;
+		$posts = $this->parseResults($results, $posts);
 
-			$post->service_id = $result->id;
-			$post->post_path = $result->link;
-			$post->media_link = $result->images->standard_resolution->url;
-			$post->type = $result->type;
-			$post->poster_id = $result->user->id;
-			$post->created_time = $result->created_time;
-			$posts->add($post);
+		if (!empty($results->pagination)) {
+			if (!empty($results->pagination->next_url)) {
+				$paginatedResults = json_decode(file_get_contents($results->pagination->next_url));
+				$posts = $this->parseResults($paginatedResults, $posts);
+			}
 		}
 
-		$newPosts = $posts->filter(function($posts) use ($post) {
-			return is_null(Post::where('service_id', $post->service_id)->first());
+		$newPosts = $posts->filter(function($post) {
+			return is_null(Post::where('post_path', $post->post_path)->first());
 		});
-
+	
 		foreach($newPosts as $post) {
 			$post->save();
 
@@ -97,6 +103,22 @@ class Instalert extends Command {
 		}
 	}
 
+	private function parseResults($results, $posts)
+	{
+                foreach($results->data as $key => $result) {
+                        $post = new Post;
+
+                        $post->service_id = $result->id;
+                        $post->post_path = $result->link;
+                        $post->media_link = $result->images->standard_resolution->url;
+                        $post->type = $result->type;
+                        $post->poster_id = $result->user->id;
+                        $post->created_time = $result->created_time;
+                        $posts->add($post);
+                }
+
+		return $posts;
+	}
 	/**
 	 * Get the console command arguments.
 	 *
