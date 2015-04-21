@@ -101,6 +101,8 @@ class Instalert extends Command {
 				));
 			}
 		}
+
+		$this->info(sprintf('%s posts found and %s numbers notified', $newPosts->count(), count($numbers)));
 	}
 
 	private function parseResults($results, $posts)
