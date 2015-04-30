@@ -148,6 +148,11 @@ return [
 		'App\Providers\EventServiceProvider',
 		'App\Providers\RouteServiceProvider',
 
+		/**
+		 * Instalert Service Providers...
+		 */
+		'App\Providers\CourierServiceProvider',
+
 	],
 
 	/*

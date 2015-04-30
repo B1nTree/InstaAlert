@@ -16,6 +16,8 @@ class TextBelt extends CourierAbstract implements Courier
 	public function make()
 	{
 		$this->message = array();
+
+		return $this;
 	}
 
 	public function send()

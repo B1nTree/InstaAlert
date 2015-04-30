@@ -7,8 +7,8 @@ namespace App\Providers;
  * @author Dylan Pierce <me@dylanjpierce.com>
  */
 
-use App\Service\SMS\Courier;
-use App\Service\SMS\TextBelt;
+use App\Services\SMS\Courier;
+use App\Services\SMS\TextBelt;
 use Illuminate\Support\ServiceProvider;
 
 class CourierServiceProvider extends ServiceProvider {
