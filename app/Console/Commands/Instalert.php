@@ -8,12 +8,18 @@ use MetzWeb\Instagram\Instagram;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 use App\Post;
+use App\Services\SMS\Courier;
 
 class Instalert extends Command {
 
 	const APP_KEY = 'a8813a12de174b009df721fb3889fa65';
 
 	const JINXED_USER_ID = '32576604';
+
+	/**
+	 * @var Courier
+	 */
+	protected $courier;
 
 	/*
 	 * The console command name.
@@ -34,8 +40,10 @@ class Instalert extends Command {
 	 *
 	 * @return void
 	 */
-	public function __construct()
+	public function __construct(Courier $courier)
 	{
+		$this->courier = $courier;
+
 		parent::__construct();
 	}
 
@@ -81,24 +89,16 @@ class Instalert extends Command {
 				continue;
 			}
 
-			$AccountSid = 'AC16d9735b5bc62d2da35645a57592a7ac';
-			$AuthToken = 'fe83b2c93584ff131eb1cd7f9704b5a8';
-
 			$numbers = array('330-730-9623', '609-410-8626');
 
-			$post_time = Carbon::createFromTimeStamp($post->created_time)->toFormattedDateString();
+			$post_time = Carbon::createFromTimeStamp($post->created_time);
+			$now = Carbon::now();
+			$difference = $now->diffInMinutes($post_time);
 
-			$body = sprintf("Hey hi hello. Just want to let you know that %s just uploaded a post on Instagram at %s. View it here: %s \n -- Dylan's Server", 'Jinxed', $post_time, $post->post_path);
-
-			// Sending text
-			$client = new \Services_Twilio($AccountSid, $AuthToken);
+			$body = sprintf("Hey hi hello. %s uploaded a post on Instagram %s minutes ago. View it here: %s \n -- Dylan's Server", 'Jinxed', $difference, $post->post_path);
 
 			foreach($numbers as $number) {
-				$message = $client->account->messages->create(array(
-				    "From" => "786-393-6488",
-				    "To" => $number,
-				    "Body" => $body,
-				));
+				$this->courier->make()->setRecipent($number)->setBody($body)->send();
 			}
 		}
 
@@ -107,17 +107,17 @@ class Instalert extends Command {
 
 	private function parseResults($results, $posts)
 	{
-                foreach($results->data as $key => $result) {
-                        $post = new Post;
+        foreach($results->data as $key => $result) {
+                $post = new Post;
 
-                        $post->service_id = $result->id;
-                        $post->post_path = $result->link;
-                        $post->media_link = $result->images->standard_resolution->url;
-                        $post->type = $result->type;
-                        $post->poster_id = $result->user->id;
-                        $post->created_time = $result->created_time;
-                        $posts->add($post);
-                }
+                $post->service_id = $result->id;
+                $post->post_path = $result->link;
+                $post->media_link = $result->images->standard_resolution->url;
+                $post->type = $result->type;
+                $post->poster_id = $result->user->id;
+                $post->created_time = $result->created_time;
+                $posts->add($post);
+        }
 
 		return $posts;
 	}

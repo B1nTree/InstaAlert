@@ -22,5 +22,4 @@ Route::controllers([
 
 Route::get('subscribe', 'InstagramController@subscribe');
 
-Route::get('update', 'InstagramController@update');
-
+Route::get('dashboard', 'InstagramController@dashboard');
