@@ -89,7 +89,7 @@ class Instalert extends Command {
 				continue;
 			}
 
-			$numbers = array('267-229-3042');
+			$numbers = array();
 
 			$post_time = Carbon::createFromTimeStamp($post->created_time);
 			$now = Carbon::now();
